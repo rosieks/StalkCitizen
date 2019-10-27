@@ -18,6 +18,14 @@
     <h1 class="display-4">Search result</h1>
     <p>FirstName: @Model.CitizenData.FirstName</p>
     <p>LastName: @Model.CitizenData.LastName</p>
-    <p>CPR: @Model.CitizenData.CprNumber</p>
+    <p>CPR: @Model.CitizenData.Cpr</p>
+    <p>Marital status: @Model.CitizenData.MaritalStatus</p>
+    <p>Citizenships: @string.Join(",", Model.CitizenData.Citizenships)</p>
+    <p>Addresses:
+        @foreach (var address in Model.CitizenData.Addresses)
+        {
+            <p>@address.City</p>
+        }
+    </p>
 </div>
 }
