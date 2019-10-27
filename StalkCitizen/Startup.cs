@@ -1,3 +1,5 @@
+using Kmd.Logic.Audit.Client;
+using Kmd.Logic.Audit.Client.SerilogAzureEventHubs;
 using Kmd.Logic.Cpr.Client;
 using Kmd.Logic.Identity.Authorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -41,10 +43,10 @@ namespace StalkCitizen
 
 
             services.AddMvc(o =>
-            { 
+            {
                 o.Filters.Add(new AuthorizeFilter("default"));
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            
+
             services.AddAuthorization(o =>
             {
                 o.AddPolicy("default", policy =>
@@ -52,7 +54,7 @@ namespace StalkCitizen
                     policy.RequireAuthenticatedUser();
                 });
             });
-            
+
             services
                 .AddAuthentication(options =>
                 {
@@ -69,9 +71,16 @@ namespace StalkCitizen
                     options.SignedOutRedirectUri = "https://localhost:5000/";
                     options.TokenValidationParameters.NameClaimType = "name";
                 })
-                .AddCookie(o=> o.LoginPath = "/signin");
+                .AddCookie(o => o.LoginPath = "/signin");
 
             services.AddSingleton(new LogicTokenProviderFactory(Configuration.TokenProvider));
+            services.AddSingleton<IAudit>(new SerilogAzureEventHubsAuditClient(
+                new SerilogAzureEventHubsAuditClientConfiguration
+                {
+                    ConnectionString = Configuration.SerilogAzureEventHubConnectionString,
+                    EventSource = Configuration.SerilogAzureEventHubEventSource,
+                    EnrichFromLogContext = true,
+                }));
             services.AddSingleton(Configuration.Cpr);
             services.AddHttpClient<CprClient>();
         }
