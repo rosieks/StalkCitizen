@@ -5,6 +5,19 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Enter CPR number</h1>
+    <form method="post">
+        <p><input asp-for="SearchCitizen.CprNumber" /></p>
+        <p><inpit type="submit" /></p>
+    </form>
 </div>
+
+@if (Model.CitizenData != null)
+{
+<div class="text-center">
+    <h1 class="display-4">Search result</h1>
+    <p>FirstName: @Model.CitizenData.FirstName</p>
+    <p>LastName: @Model.CitizenData.LastName</p>
+    <p>CPR: @Model.CitizenData.CprNumber</p>
+</div>
+}
