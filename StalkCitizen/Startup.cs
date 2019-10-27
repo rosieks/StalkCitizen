@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+using Kmd.Logic.Cpr.Client;
+using Kmd.Logic.Identity.Authorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -19,6 +15,8 @@ namespace StalkCitizen
 {
     public class Startup
     {
+        internal StalkCitizenConfiguration Configuration { get; }
+
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -27,10 +25,9 @@ namespace StalkCitizen
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddUserSecrets<Startup>(optional: true)
                 .AddEnvironmentVariables();
-            Configuration = builder.Build();
-        }
 
-        public IConfiguration Configuration { get; }
+            Configuration = builder.Build().Get<StalkCitizenConfiguration>();
+        }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -65,14 +62,17 @@ namespace StalkCitizen
                 })
                 .AddOpenIdConnect(options =>
                 {
-                    options.Authority = Configuration["Authentication:Authority"];
-                    options.ClientId = Configuration["Authentication:ClientId"];
+                    options.Authority = Configuration.TokenProvider.AuthorizationTokenIssuer.ToString();
+                    options.ClientId = Configuration.TokenProvider.ClientId;
                     options.ResponseType = OpenIdConnectResponseType.IdToken;
                     options.CallbackPath = "/auth/signin-callback";
                     options.SignedOutRedirectUri = "https://localhost:5000/";
                     options.TokenValidationParameters.NameClaimType = "name";
                 })
                 .AddCookie(o=> o.LoginPath = "/signin");
+
+            services.AddSingleton(new LogicTokenProviderFactory(Configuration.TokenProvider));
+            services.AddHttpClient<CprClient>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
