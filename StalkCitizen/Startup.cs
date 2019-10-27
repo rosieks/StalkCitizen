@@ -72,6 +72,7 @@ namespace StalkCitizen
                 .AddCookie(o=> o.LoginPath = "/signin");
 
             services.AddSingleton(new LogicTokenProviderFactory(Configuration.TokenProvider));
+            services.AddSingleton(Configuration.Cpr);
             services.AddHttpClient<CprClient>();
         }
 
