@@ -2,20 +2,32 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace StalkCitizen
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddUserSecrets<Startup>(optional: true)
+                .AddEnvironmentVariables();
+            Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
@@ -31,7 +43,36 @@ namespace StalkCitizen
             });
 
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc(o =>
+            { 
+                o.Filters.Add(new AuthorizeFilter("default"));
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            
+            services.AddAuthorization(o =>
+            {
+                o.AddPolicy("default", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                });
+            });
+            
+            services
+                .AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                })
+                .AddOpenIdConnect(options =>
+                {
+                    options.Authority = Configuration["Authentication:Authority"];
+                    options.ClientId = Configuration["Authentication:ClientId"];
+                    options.ResponseType = OpenIdConnectResponseType.IdToken;
+                    options.CallbackPath = "/auth/signin-callback";
+                    options.SignedOutRedirectUri = "https://localhost:5000/";
+                    options.TokenValidationParameters.NameClaimType = "name";
+                })
+                .AddCookie(o=> o.LoginPath = "/signin");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,6 +89,8 @@ namespace StalkCitizen
 
             app.UseStaticFiles();
             app.UseCookiePolicy();
+            app.UseAuthentication();
+
 
             app.UseMvc();
         }
