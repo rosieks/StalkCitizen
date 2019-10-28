@@ -12,5 +12,6 @@ namespace StalkCitizen
         public string AllowedHosts { get; set; } = string.Empty;
         public string SerilogAzureEventHubEventSource { get; set; }
         public string SerilogAzureEventHubConnectionString { get; set; }
+        public string ClientId { get; set; }
     }
 }

@@ -65,7 +65,7 @@ namespace StalkCitizen
                 .AddOpenIdConnect(options =>
                 {
                     options.Authority = "https://login.microsoftonline.com/1aaaea9d-df3e-4ce7-a55d-43de56e79442";
-                    options.ClientId = Configuration.TokenProvider.ClientId;
+                    options.ClientId = Configuration.ClientId;
                     options.ResponseType = OpenIdConnectResponseType.IdToken;
                     options.CallbackPath = "/auth/signin-callback";
                     options.SignedOutRedirectUri = "https://localhost:5000/";
