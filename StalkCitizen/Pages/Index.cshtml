@@ -4,28 +4,47 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Enter CPR number</h1>
-    <form method="post">
-        <p><input asp-for="SearchCitizen.CprNumber" /></p>
-        <p><inpit type="submit" /></p>
-    </form>
-</div>
-
-@if (Model.CitizenData != null)
+@if (!Model.ShowResult)
 {
-<div class="text-center">
-    <h1 class="display-4">Search result</h1>
-    <p>FirstName: @Model.CitizenData.FirstName</p>
-    <p>LastName: @Model.CitizenData.LastName</p>
-    <p>CPR: @Model.CitizenData.Cpr</p>
-    <p>Marital status: @Model.CitizenData.MaritalStatus</p>
-    <p>Citizenships: @string.Join(",", Model.CitizenData.Citizenships)</p>
-    <p>Addresses:
-        @foreach (var address in Model.CitizenData.Addresses)
-        {
-            <p>@address.City</p>
-        }
-    </p>
-</div>
+    <div class="text-center">
+        <h1 class="display-4">Enter CPR number</h1>
+        <form method="post">
+            <p>CPR: <input asp-for="SearchCitizen.CprNumber" readonly="@(Model.ShowPassword ? "readonly" : null)" /></p>
+            @if (!Model.ShowPassword)
+            {
+                <p><input asp-page-handler="SearchCitizen" type="submit" value="Search" /></p>
+            }
+            @if (Model.ShowPassword)
+            {
+                <p>SMS password: <input asp-for="SearchCitizen.Password" /></p>
+                <p><input asp-page-handler="ConfirmPassword" type="submit" value="Confirm" /></p>
+            }
+        </form>
+    </div>
 }
+@if (Model.ShowResult)
+{
+    if (Model.CitizenData != null)
+    {
+        <div class="text-center">
+            <h1 class="display-4">Search result</h1>
+            <p>FirstName: @Model.CitizenData.FirstName</p>
+            <p>LastName: @Model.CitizenData.LastName</p>
+            <p>CPR: @Model.CitizenData.Cpr</p>
+            <p>Marital status: @Model.CitizenData.MaritalStatus</p>
+            <p>Citizenships: @string.Join(",", Model.CitizenData.Citizenships)</p>
+            <p>
+                Addresses:
+                @foreach (var address in Model.CitizenData.Addresses)
+                {
+                <p>@address.City</p>
+            }
+                </p>
+            </div>
+        }
+        else
+        {
+            <p>Not found</p>
+        }
+        <a href="/">Search again</a>
+    }

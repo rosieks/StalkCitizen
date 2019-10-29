@@ -23,9 +23,22 @@ namespace StalkCitizen.Pages
 
         public Citizen CitizenData { get; set; }
 
-        public async Task OnPostAsync()
+        public bool ShowPassword { get; set; }
+        public bool ShowResult { get; set; }
+
+        public Task OnPostSearchCitizen()
+        {
+            this.ShowPassword = true;
+
+            // TODO: Send SMS
+
+            return Task.CompletedTask;
+        }
+
+        public async Task OnPostConfirmPassword()
         {
             this.CitizenData = await GetCitizenData(this.SearchCitizen.CprNumber);
+            this.ShowResult = true;
 
             _audit.Write("{User} stalked citizen with CPR number {CprNumber}", User.Identity.Name, this.SearchCitizen.CprNumber);
         }
@@ -37,7 +50,9 @@ namespace StalkCitizen.Pages
     }
 
     public class SearchCitizen
-    {
+    { 
         public string CprNumber { get; set; }
+
+        public string Password { get; set; }
     }
 }
