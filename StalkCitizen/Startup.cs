@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using StalkCitizen.Clients.DigitalPost;
 using System.Threading;
+using StalkCitizen.Services;
 
 namespace StalkCitizen
 {
@@ -85,6 +86,14 @@ namespace StalkCitizen
                     EnrichFromLogContext = true,
                 }));
             services.AddSingleton(Configuration.Cpr);
+            services.AddScoped<ICitizenService, LogicCitizenService>();
+            services.AddScoped<ICitizenNotifier>(x =>
+            {
+                var subscription = Configuration.DigitalPost.SubscriptionId;
+                var configurationId = Configuration.DigitalPost.DigitalPostConfigurationId;
+                var digitalPostFile = x.GetRequiredService<DigitalPostClient>();
+                return new LogicCitizenNotifier(digitalPostFile, subscription, configurationId);
+            });
             services.AddHttpClient<CprClient>();
             services.AddHttpClient<DigitalPostClient>(c =>
             {
