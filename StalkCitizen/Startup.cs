@@ -1,3 +1,4 @@
+using System.Net.Http;
 using Kmd.Logic.Audit.Client;
 using Kmd.Logic.Audit.Client.SerilogAzureEventHubs;
 using Kmd.Logic.Cpr.Client;
@@ -14,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using StalkCitizen.Clients.DigitalPost;
 using System.Threading;
+using Microsoft.Rest;
 using StalkCitizen.Services;
 
 namespace StalkCitizen
@@ -91,17 +93,21 @@ namespace StalkCitizen
             {
                 var subscription = Configuration.DigitalPost.SubscriptionId;
                 var configurationId = Configuration.DigitalPost.DigitalPostConfigurationId;
-                var digitalPostFile = x.GetRequiredService<DigitalPostClient>();
-                return new LogicCitizenNotifier(digitalPostFile, subscription, configurationId);
+                var client = x.GetRequiredService<DigitalPostClient>();
+                return new LogicCitizenNotifier(client, subscription, configurationId);
+            });
+            
+            services.AddScoped(x =>
+            {
+                var httpClientFactory = x.GetService<IHttpClientFactory>();
+                var client = new DigitalPostClient(
+                    new TokenCredentials(
+                        logicTokenProviderFactory.GetProvider(httpClientFactory.CreateClient())
+                    )
+                );
+                return client;
             });
             services.AddHttpClient<CprClient>();
-            services.AddHttpClient<DigitalPostClient>(c =>
-            {
-                c.DefaultRequestHeaders.Authorization = logicTokenProviderFactory
-                    .GetProvider(c)
-                    .GetAuthenticationHeaderAsync(CancellationToken.None)
-                    .Result;
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
