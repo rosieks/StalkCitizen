@@ -1,6 +1,7 @@
 ﻿using Kmd.Logic.Audit.Client;
 using Kmd.Logic.Cpr.Client;
 using Kmd.Logic.Cpr.Client.Models;
+using Kmd.Logic.Sms.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Threading.Tasks;
@@ -9,11 +10,13 @@ namespace StalkCitizen.Pages
 {
     public class IndexModel : PageModel
     {
+        private readonly SmsClient _smsClient;
         private readonly CprClient _cprClient;
         private readonly IAudit _audit;
 
-        public IndexModel(CprClient cprClient, IAudit audit)
+        public IndexModel(SmsClient smsClient, CprClient cprClient, IAudit audit)
         {
+            _smsClient = smsClient;
             _cprClient = cprClient;
             _audit = audit;
         }
@@ -26,13 +29,11 @@ namespace StalkCitizen.Pages
         public bool ShowPassword { get; set; }
         public bool ShowResult { get; set; }
 
-        public Task OnPostSearchCitizen()
+        public async Task OnPostSearchCitizen()
         {
             this.ShowPassword = true;
 
-            // TODO: Send SMS
-
-            return Task.CompletedTask;
+            await _smsClient.SendSmsAsync()
         }
 
         public async Task OnPostConfirmPassword()

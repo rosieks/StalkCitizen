@@ -2,6 +2,7 @@ using Kmd.Logic.Audit.Client;
 using Kmd.Logic.Audit.Client.SerilogAzureEventHubs;
 using Kmd.Logic.Cpr.Client;
 using Kmd.Logic.Identity.Authorization;
+using Kmd.Logic.Sms.Client;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
@@ -86,6 +87,13 @@ namespace StalkCitizen
                 }));
             services.AddSingleton(Configuration.Cpr);
             services.AddHttpClient<CprClient>();
+            services.AddHttpClient<SmsClient>(c =>
+            {
+                c.DefaultRequestHeaders.Authorization = logicTokenProviderFactory
+                    .GetProvider(c)
+                    .GetAuthenticationHeaderAsync(CancellationToken.None)
+                    .Result;
+            });
             services.AddHttpClient<DigitalPostClient>(c =>
             {
                 c.DefaultRequestHeaders.Authorization = logicTokenProviderFactory
