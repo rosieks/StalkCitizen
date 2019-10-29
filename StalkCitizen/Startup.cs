@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using StalkCitizen.Clients.DigitalPost;
+using System.Threading;
 
 namespace StalkCitizen
 {
@@ -73,7 +75,8 @@ namespace StalkCitizen
                 })
                 .AddCookie(o => o.LoginPath = "/signin");
 
-            services.AddSingleton(new LogicTokenProviderFactory(Configuration.TokenProvider));
+            var logicTokenProviderFactory = new LogicTokenProviderFactory(Configuration.TokenProvider);
+            services.AddSingleton(logicTokenProviderFactory);
             services.AddSingleton<IAudit>(new SerilogAzureEventHubsAuditClient(
                 new SerilogAzureEventHubsAuditClientConfiguration
                 {
@@ -83,6 +86,13 @@ namespace StalkCitizen
                 }));
             services.AddSingleton(Configuration.Cpr);
             services.AddHttpClient<CprClient>();
+            services.AddHttpClient<DigitalPostClient>(c =>
+            {
+                c.DefaultRequestHeaders.Authorization = logicTokenProviderFactory
+                    .GetProvider(c)
+                    .GetAuthenticationHeaderAsync(CancellationToken.None)
+                    .Result;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
