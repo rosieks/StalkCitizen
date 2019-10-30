@@ -1,4 +1,3 @@
-using System.Net.Http;
 using Kmd.Logic.Audit.Client;
 using Kmd.Logic.Audit.Client.SerilogAzureEventHubs;
 using Kmd.Logic.Cpr.Client;
@@ -14,10 +13,10 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using StalkCitizen.Clients.DigitalPost;
-using System.Threading;
 using Microsoft.Rest;
+using StalkCitizen.Clients.DigitalPost;
 using StalkCitizen.Services;
+using System.Net.Http;
 
 namespace StalkCitizen
 {
@@ -70,8 +69,8 @@ namespace StalkCitizen
                 })
                 .AddOpenIdConnect(options =>
                 {
-                    options.Authority = "https://login.microsoftonline.com/1aaaea9d-df3e-4ce7-a55d-43de56e79442";
-                    options.ClientId = Configuration.ClientId;
+                    options.Authority = Configuration.Authentication.Authority;
+                    options.ClientId = Configuration.Authentication.ClientId;
                     options.ResponseType = OpenIdConnectResponseType.IdToken;
                     options.CallbackPath = "/auth/signin-callback";
                     options.SignedOutRedirectUri = "https://localhost:5000/";
