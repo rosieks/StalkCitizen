@@ -17,7 +17,10 @@
             @if (Model.ShowPassword)
             {
                 <p>SMS password: <input asp-for="SearchCitizen.Password" /></p>
+                @if (Model.ShowError)
+                { <p>Incorrect password</p> }
                 <p><input asp-page-handler="ConfirmPassword" type="submit" value="Confirm" /></p>
+                <input type="hidden" asp-for="SearchCitizen.OriginalPassword" />
             }
         </form>
     </div>

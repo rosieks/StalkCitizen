@@ -16,6 +16,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.Rest;
 using StalkCitizen.Clients.DigitalPost;
 using StalkCitizen.Services;
+using System;
 using System.Net.Http;
 
 namespace StalkCitizen
@@ -46,11 +47,12 @@ namespace StalkCitizen
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-
+            services.AddDistributedMemoryCache();
             services.AddMvc(o =>
             {
                 o.Filters.Add(new AuthorizeFilter("default"));
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddSession();
 
             services.AddAuthorization(o =>
             {
@@ -136,8 +138,7 @@ namespace StalkCitizen
             app.UseStaticFiles();
             app.UseCookiePolicy();
             app.UseAuthentication();
-
-
+            app.UseSession();
             app.UseMvc();
         }
     }
