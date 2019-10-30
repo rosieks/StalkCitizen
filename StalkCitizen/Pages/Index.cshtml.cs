@@ -41,7 +41,7 @@ namespace StalkCitizen.Pages
                 {
                     Body = "Some SMS",
                     ProviderConfigurationId = _smsOptions.SmsConfigurationId,
-                    ToPhoneNumber = "+48696474961",
+                    ToPhoneNumber = _smsOptions.PhoneNumber,
                 });
         }
 
