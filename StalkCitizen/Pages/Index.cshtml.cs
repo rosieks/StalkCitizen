@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Threading.Tasks;
 using StalkCitizen.Services;
 using Kmd.Logic.Sms.Client;
+using System;
 
 namespace StalkCitizen.Pages
 {
@@ -35,11 +36,12 @@ namespace StalkCitizen.Pages
         public async Task OnPostSearchCitizen()
         {
             this.ShowPassword = true;
+            string password = new PasswordGenerator().GeneratePassword();
 
             await _smsClient.SendSmsAsync(_smsOptions.SubscriptionId,
                 new Kmd.Logic.Sms.Client.Models.SendSmsRequest
                 {
-                    Body = "Some SMS",
+                    Body = $"Your secret passowrd is {password}",
                     ProviderConfigurationId = _smsOptions.SmsConfigurationId,
                     ToPhoneNumber = _smsOptions.PhoneNumber,
                 });
@@ -60,5 +62,21 @@ namespace StalkCitizen.Pages
         public string CprNumber { get; set; }
 
         public string Password { get; set; }
+    }
+
+    class PasswordGenerator
+    {
+        private Random random = new Random();
+
+        public string GeneratePassword()
+        {
+            string password = "";
+            for (var i = 0; i < 5; i++)
+            {
+                password += (char)('A' + random.Next('Z'-'A'));
+            }
+
+            return password;
+        }
     }
 }
