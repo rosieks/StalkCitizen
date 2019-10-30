@@ -81,7 +81,7 @@ namespace StalkCitizen
                 .AddCookie(o => o.LoginPath = "/signin");
 
             var logicTokenProviderFactory = new LogicTokenProviderFactory(Configuration.TokenProvider);
-            services.AddSingleton(logicTokenProviderFactory);
+            services.AddSingleton(new LogicTokenProviderFactory(Configuration.TokenProvider));
             services.AddSingleton<IAudit>(new SerilogAzureEventHubsAuditClient(
                 new SerilogAzureEventHubsAuditClientConfiguration
                 {
@@ -121,6 +121,7 @@ namespace StalkCitizen
                 );
                 return client;
             });
+            services.AddScoped<ISmsService, LogicSmsService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

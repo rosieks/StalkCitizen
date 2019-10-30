@@ -13,13 +13,13 @@ namespace StalkCitizen.Pages
     {
         private readonly ICitizenService _citizenService;
         private readonly ICitizenNotifier _citizenNotifier;
-        private readonly SmsClient _smsClient;
+        private readonly ISmsService _smsService;
         private readonly SmsOptions _smsOptions;
         private readonly IAudit _audit;
 
-        public IndexModel(SmsClient smsClient, ICitizenService citizenService, ICitizenNotifier citizenNotifier, SmsOptions smsOptions, IAudit audit)
+        public IndexModel(ISmsService smsService, ICitizenService citizenService, ICitizenNotifier citizenNotifier, SmsOptions smsOptions, IAudit audit)
         {
-            _smsClient = smsClient;
+            _smsService = smsService;
             _smsOptions = smsOptions;
             _audit = audit;
             _citizenService = citizenService;
@@ -41,13 +41,7 @@ namespace StalkCitizen.Pages
             string password = new PasswordGenerator().GeneratePassword();
             this.SearchCitizen.OriginalPassword = password;
 
-            await _smsClient.SendSmsAsync(_smsOptions.SubscriptionId,
-                new Kmd.Logic.Sms.Client.Models.SendSmsRequest
-                {
-                    Body = $"Your secret passowrd is {password}",
-                    ProviderConfigurationId = _smsOptions.SmsConfigurationId,
-                    ToPhoneNumber = _smsOptions.PhoneNumber,
-                });
+            await _smsService.SendSms(_smsOptions.PhoneNumber, $"Your secret passowrd is {password}");
         }
 
         public async Task OnPostConfirmPassword()
