@@ -8,6 +8,7 @@
 
 
   <ItemGroup>
+    <PackageReference Include="IronPdf" Version="2019.7.0" />
     <PackageReference Include="Kmd.Logic.Audit.Client.SerilogAzureEventHubs" Version="1.2.2" />
     <PackageReference Include="Kmd.Logic.Cpr.Client" Version="1.0.0" />
     <PackageReference Include="Kmd.Logic.Identity.Authorization" Version="1.0.0" />

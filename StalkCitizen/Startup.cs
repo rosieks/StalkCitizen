@@ -1,3 +1,4 @@
+using System.Net.Http;
 using Kmd.Logic.Audit.Client;
 using Kmd.Logic.Audit.Client.SerilogAzureEventHubs;
 using Kmd.Logic.Cpr.Client;
@@ -15,6 +16,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using StalkCitizen.Clients.DigitalPost;
 using System.Threading;
+using Microsoft.Rest;
+using StalkCitizen.Services;
 
 namespace StalkCitizen
 {
@@ -86,6 +89,16 @@ namespace StalkCitizen
                     EnrichFromLogContext = true,
                 }));
             services.AddSingleton(Configuration.Cpr);
+            services.AddScoped<ICitizenService, LogicCitizenService>();
+            services.AddScoped<ICitizenNotifier>(x =>
+            {
+                var subscription = Configuration.DigitalPost.SubscriptionId;
+                var configurationId = Configuration.DigitalPost.DigitalPostConfigurationId;
+                var client = x.GetRequiredService<DigitalPostClient>();
+                return new LogicCitizenNotifier(client, subscription, configurationId);
+            });
+            
+            services.AddScoped(x =>
             services.AddHttpClient<CprClient>();
             services.AddSingleton<SmsOptions>(Configuration.Sms);
             services.AddHttpClient<SmsClient>(c =>
@@ -97,11 +110,15 @@ namespace StalkCitizen
             });
             services.AddHttpClient<DigitalPostClient>(c =>
             {
-                c.DefaultRequestHeaders.Authorization = logicTokenProviderFactory
-                    .GetProvider(c)
-                    .GetAuthenticationHeaderAsync(CancellationToken.None)
-                    .Result;
+                var httpClientFactory = x.GetService<IHttpClientFactory>();
+                var client = new DigitalPostClient(
+                    new TokenCredentials(
+                        logicTokenProviderFactory.GetProvider(httpClientFactory.CreateClient())
+                    )
+                );
+                return client;
             });
+            services.AddHttpClient<CprClient>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

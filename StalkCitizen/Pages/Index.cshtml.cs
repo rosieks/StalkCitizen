@@ -1,32 +1,32 @@
 ﻿using Kmd.Logic.Audit.Client;
-using Kmd.Logic.Cpr.Client;
-using Kmd.Logic.Cpr.Client.Models;
-using Kmd.Logic.Sms.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Threading.Tasks;
+using StalkCitizen.Services;
 
 namespace StalkCitizen.Pages
 {
     public class IndexModel : PageModel
     {
+        private readonly ICitizenService _citizenService;
+        private readonly ICitizenNotifier _citizenNotifier;
         private readonly SmsClient _smsClient;
         private readonly SmsOptions _smsOptions;
-        private readonly CprClient _cprClient;
         private readonly IAudit _audit;
 
-        public IndexModel(SmsClient smsClient, CprClient cprClient, SmsOptions smsOptions, IAudit audit)
+        public IndexModel(SmsClient smsClient, ICitizenService citizenService, ICitizenNotifier citizenNotifier, SmsOptions smsOptions, IAudit audit)
         {
             _smsClient = smsClient;
             _smsOptions = smsOptions;
-            _cprClient = cprClient;
             _audit = audit;
+            _citizenService = citizenService;
+            _citizenNotifier = citizenNotifier;
         }
 
         [BindProperty]
         public SearchCitizen SearchCitizen { get; set; }
 
-        public Citizen CitizenData { get; set; }
+        public CitizenModel CitizenData { get; set; }
 
         public bool ShowPassword { get; set; }
         public bool ShowResult { get; set; }
@@ -46,15 +46,11 @@ namespace StalkCitizen.Pages
 
         public async Task OnPostConfirmPassword()
         {
-            this.CitizenData = await GetCitizenData(this.SearchCitizen.CprNumber);
-            this.ShowResult = true;
-
+            CitizenData = await _citizenService.GetCitizen(SearchCitizen.CprNumber);
+            await _citizenNotifier.NotifyCitizen(SearchCitizen.CprNumber,
+                $"You have been stalked ${CitizenData.FirstName}");
+            ShowResult = true;
             _audit.Write("{User} stalked citizen with CPR number {CprNumber}", User.Identity.Name, this.SearchCitizen.CprNumber);
-        }
-
-        private Task<Citizen> GetCitizenData(string cpr)
-        {
-            return _cprClient.GetCitizenByCprAsync(cpr);
         }
     }
 
