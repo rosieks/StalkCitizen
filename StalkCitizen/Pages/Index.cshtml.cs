@@ -11,12 +11,14 @@ namespace StalkCitizen.Pages
     public class IndexModel : PageModel
     {
         private readonly SmsClient _smsClient;
+        private readonly SmsOptions _smsOptions;
         private readonly CprClient _cprClient;
         private readonly IAudit _audit;
 
-        public IndexModel(SmsClient smsClient, CprClient cprClient, IAudit audit)
+        public IndexModel(SmsClient smsClient, CprClient cprClient, SmsOptions smsOptions, IAudit audit)
         {
             _smsClient = smsClient;
+            _smsOptions = smsOptions;
             _cprClient = cprClient;
             _audit = audit;
         }
@@ -33,7 +35,13 @@ namespace StalkCitizen.Pages
         {
             this.ShowPassword = true;
 
-            await _smsClient.SendSmsAsync()
+            await _smsClient.SendSmsAsync(_smsOptions.SubscriptionId,
+                new Kmd.Logic.Sms.Client.Models.SendSmsRequest
+                {
+                    Body = "Some SMS",
+                    ProviderConfigurationId = _smsOptions.SubscriptionId,
+                    ToPhoneNumber = "+48696474961",
+                });
         }
 
         public async Task OnPostConfirmPassword()

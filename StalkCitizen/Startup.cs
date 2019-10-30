@@ -28,7 +28,7 @@ namespace StalkCitizen
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddUserSecrets<Startup>(optional: true)
+                .AddUserSecrets<Startup>(optional: false)
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build().Get<StalkCitizenConfiguration>();
@@ -87,6 +87,7 @@ namespace StalkCitizen
                 }));
             services.AddSingleton(Configuration.Cpr);
             services.AddHttpClient<CprClient>();
+            services.AddSingleton<SmsOptions>(Configuration.Sms);
             services.AddHttpClient<SmsClient>(c =>
             {
                 c.DefaultRequestHeaders.Authorization = logicTokenProviderFactory
