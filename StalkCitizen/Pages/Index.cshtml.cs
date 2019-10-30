@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Threading.Tasks;
 using StalkCitizen.Services;
+using Kmd.Logic.Sms.Client;
 
 namespace StalkCitizen.Pages
 {
@@ -39,7 +40,7 @@ namespace StalkCitizen.Pages
                 new Kmd.Logic.Sms.Client.Models.SendSmsRequest
                 {
                     Body = "Some SMS",
-                    ProviderConfigurationId = _smsOptions.SubscriptionId,
+                    ProviderConfigurationId = _smsOptions.SmsConfigurationId,
                     ToPhoneNumber = "+48696474961",
                 });
         }

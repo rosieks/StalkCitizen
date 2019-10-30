@@ -97,18 +97,8 @@ namespace StalkCitizen
                 var client = x.GetRequiredService<DigitalPostClient>();
                 return new LogicCitizenNotifier(client, subscription, configurationId);
             });
-            
+
             services.AddScoped(x =>
-            services.AddHttpClient<CprClient>();
-            services.AddSingleton<SmsOptions>(Configuration.Sms);
-            services.AddHttpClient<SmsClient>(c =>
-            {
-                c.DefaultRequestHeaders.Authorization = logicTokenProviderFactory
-                    .GetProvider(c)
-                    .GetAuthenticationHeaderAsync(CancellationToken.None)
-                    .Result;
-            });
-            services.AddHttpClient<DigitalPostClient>(c =>
             {
                 var httpClientFactory = x.GetService<IHttpClientFactory>();
                 var client = new DigitalPostClient(
@@ -119,6 +109,17 @@ namespace StalkCitizen
                 return client;
             });
             services.AddHttpClient<CprClient>();
+            services.AddSingleton<SmsOptions>(Configuration.Sms);
+            services.AddScoped<SmsClient>(c =>
+            {
+                var httpClientFactory = c.GetService<IHttpClientFactory>();
+                var client = new SmsClient(
+                    new TokenCredentials(
+                        logicTokenProviderFactory.GetProvider(httpClientFactory.CreateClient())
+                    )
+                );
+                return client;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
