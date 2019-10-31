@@ -14,6 +14,8 @@ namespace StalkCitizen
 
         public AuthenticationOptions Authentication { get; set; }
 
+        public SmsOptions Sms { get; set; } = new SmsOptions();
+
         public string AllowedHosts { get; set; } = string.Empty;
 
         public string SerilogAzureEventHubEventSource { get; set; }

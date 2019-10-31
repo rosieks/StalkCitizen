@@ -16,16 +16,23 @@ namespace StalkCitizen.Services
         public async Task<CitizenModel> GetCitizen(string cpr)
         {
             var result = await _cprClient.GetCitizenByCprAsync(cpr);
-            return new CitizenModel
+            if (result != null)
             {
-                Id = result.Id,
-                Cpr = result.Cpr,
-                FirstName = result.FirstName,
-                LastName = result.LastName,
-                MaritalStatus = result.MaritalStatus,
-                Addresses = result.Addresses?.Select(x => new AddressModel {City = x.City}).ToList(),
-                Citizenships = result.Citizenships
-            };
+                return new CitizenModel
+                {
+                    Id = result.Id,
+                    Cpr = result.Cpr,
+                    FirstName = result.FirstName,
+                    LastName = result.LastName,
+                    MaritalStatus = result.MaritalStatus,
+                    Addresses = result.Addresses?.Select(x => new AddressModel { City = x.City }).ToList(),
+                    Citizenships = result.Citizenships
+                };
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }
