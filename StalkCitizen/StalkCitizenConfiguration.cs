@@ -4,7 +4,7 @@ using Kmd.Logic.Identity.Authorization;
 
 namespace StalkCitizen
 {
-    internal class StalkCitizenConfiguration
+    public class StalkCitizenConfiguration
     {
         public LogicTokenProviderOptions TokenProvider { get; set; } = new LogicTokenProviderOptions();
 
@@ -23,13 +23,13 @@ namespace StalkCitizen
         public string SerilogAzureEventHubConnectionString { get; set; }
     }
 
-    class DigitalPostOptions
+    public class DigitalPostOptions
     {
         public Guid SubscriptionId { get; set; }
         public Guid DigitalPostConfigurationId { get; set; }
     }
 
-    class AuthenticationOptions
+    public class AuthenticationOptions
     {
         public string Authority { get; set; }
         public string ClientId { get; set; }

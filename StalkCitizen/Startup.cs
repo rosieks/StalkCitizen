@@ -79,49 +79,14 @@ namespace StalkCitizen
                     options.TokenValidationParameters.NameClaimType = "name";
                 })
                 .AddCookie(o => o.LoginPath = "/signin");
-
-            var logicTokenProviderFactory = new LogicTokenProviderFactory(Configuration.TokenProvider);
+            
             services.AddSingleton(new LogicTokenProviderFactory(Configuration.TokenProvider));
-            services.AddSingleton<IAudit>(new SerilogAzureEventHubsAuditClient(
-                new SerilogAzureEventHubsAuditClientConfiguration
-                {
-                    ConnectionString = Configuration.SerilogAzureEventHubConnectionString,
-                    EventSource = Configuration.SerilogAzureEventHubEventSource,
-                    EnrichFromLogContext = true,
-                }));
-            services.AddSingleton(Configuration.Cpr);
-            services.AddScoped<ICitizenService, LogicCitizenService>();
-            services.AddScoped<ICitizenNotifier>(x =>
-            {
-                var subscription = Configuration.DigitalPost.SubscriptionId;
-                var configurationId = Configuration.DigitalPost.DigitalPostConfigurationId;
-                var client = x.GetRequiredService<DigitalPostClient>();
-                return new LogicCitizenNotifier(client, subscription, configurationId);
-            });
 
-            services.AddScoped(x =>
-            {
-                var httpClientFactory = x.GetService<IHttpClientFactory>();
-                var client = new DigitalPostClient(
-                    new TokenCredentials(
-                        logicTokenProviderFactory.GetProvider(httpClientFactory.CreateClient())
-                    )
-                );
-                return client;
-            });
-            services.AddHttpClient<CprClient>();
-            services.AddSingleton<SmsOptions>(Configuration.Sms);
-            services.AddScoped<SmsClient>(c =>
-            {
-                var httpClientFactory = c.GetService<IHttpClientFactory>();
-                var client = new SmsClient(
-                    new TokenCredentials(
-                        logicTokenProviderFactory.GetProvider(httpClientFactory.CreateClient())
-                    )
-                );
-                return client;
-            });
-            services.AddScoped<ISmsService, LogicSmsService>();
+            services
+                .AddAudit(Configuration)
+                .AddCitizenService(Configuration)
+                .AddCitizenNotifier(Configuration)
+                .AddSmsService(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
