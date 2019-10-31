@@ -1,3 +1,4 @@
+using System;
 using Kmd.Logic.Audit.Client;
 using Kmd.Logic.Audit.Client.SerilogAzureEventHubs;
 using Kmd.Logic.Cpr.Client;
@@ -104,6 +105,7 @@ namespace StalkCitizen
                         logicTokenProviderFactory.GetProvider(httpClientFactory.CreateClient())
                     )
                 );
+                client.BaseUri = new Uri("https://gateway.kmdlogic.io/digital-post/v1");
                 return client;
             });
             services.AddHttpClient<CprClient>();
