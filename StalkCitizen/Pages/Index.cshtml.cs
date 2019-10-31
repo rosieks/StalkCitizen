@@ -1,11 +1,9 @@
 ﻿using Kmd.Logic.Audit.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Threading.Tasks;
 using StalkCitizen.Services;
-using Kmd.Logic.Sms.Client;
 using System;
-using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace StalkCitizen.Pages
 {
